@@ -10,7 +10,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     sudo apt-get install -y wget cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev;
 fi    
 
-if [ ! -e $(ls -d */ | grep 3.4.3) ];
+if [ ! -e "opencv-3.4.3" ];
 then
     #opencvContribZipName = "opencv_contrib-3.4.3.zip";
     opencvZipName = "opencv-3.4.3.zip";
