@@ -1,0 +1,8 @@
+*~
+opencv*
+IoT_2018
+Makefile
+CMakeCache.txt
+CMakeFiles
+.idea
+cmake_install.cmake
