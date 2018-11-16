@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt_client
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
 import time
-import json
+import detectFace
 
 broker = "broker.mqttdashboard.com"
 root_topic = "doom_portal/"
@@ -12,9 +12,24 @@ authenticatedDevices = []
 
 def unlock_door(payload):
     print("Trying to unlock door with payload " + str(payload))
-    # todo : découper le visage avec openCV. Si openCV trouve pas de visage on renvoit try again,
-    # sinon on envoit le visage à l'API de face recognition qui doit nous dire si c'est ok ou pas
-    # si c'est pas ok on envoit une notification push à l'app
+    # todo get image from payload
+    faces = detectFace.get_faces("cafaitquoidegagnerleswarmupdays.jpg")
+    if len(faces) == 0:
+        print("No face detected")
+        mqtt_client.publish(root_topic + "unlock_response", "NO FACE")
+        return
+
+    # todo voir ce qu'on envoit à l'API, faut peut être creer une image pour chaque face detecté
+    for face in faces:
+        print("Testing a face")
+    mqtt_client.publish(root_topic + "unlock_response", 1)
+
+
+# improvement : get time to pair from mqtt call and set callback to publish a response
+def await_pairing(payload):
+    print("Trying to pair device with payload " + str(payload))
+    global lastPairingAttempt
+    lastPairingAttempt = time.time()
 
 
 # HTTP
@@ -25,12 +40,6 @@ def manually_unlock_door(payload):
 # HTTP
 def feed_whitelist_info(payload):
     print("Trying to manually unlock door with payload " + str(payload))
-
-
-def await_pairing(payload):
-    print("Trying to pair device with payload " + str(payload))
-    global lastPairingAttempt
-    lastPairingAttempt = time.time()
 
 
 # HTTP
