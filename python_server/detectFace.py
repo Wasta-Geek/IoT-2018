@@ -2,6 +2,13 @@ import cv2
 import numpy
 
 
+def take_webcam_photo(imageName):
+    cam = cv2.VideoCapture(0)
+    return_value, image = cam.read()
+    cv2.imwrite(imageName, image)
+    del cam
+
+
 def get_faces(image_path):
     # Get user supplied values
     casc_path = "haarcascade_frontalface_default.xml"

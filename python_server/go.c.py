@@ -11,18 +11,19 @@ authenticatedDevices = []
 
 
 def unlock_door(payload):
-    print("Trying to unlock door with payload " + str(payload))
-    # todo get image from payload
-    faces = detectFace.get_faces("cafaitquoidegagnerleswarmupdays.jpg")
-    if len(faces) == 0:
-        print("No face detected")
-        mqtt_client.publish(root_topic + "unlock_response", "NO FACE")
-        return
 
-    # todo voir ce qu'on envoit à l'API, faut peut être creer une image pour chaque face detecté
-    for face in faces:
-        print("Testing a face")
-    mqtt_client.publish(root_topic + "unlock_response", 1)
+    detectFace.take_webcam_photo("temp_cam_photo.png")
+
+#    print("Trying to unlock door with payload " + str(payload))
+#    faces = detectFace.get_faces("cafaitquoidegagnerleswarmupdays.jpg")
+#    if len(faces) == 0:
+#        print("No face detected")
+#        mqtt_client.publish(root_topic + "unlock_response", "NO FACE")
+#        return
+
+#    for face in faces:
+#        print("Testing a face")
+#    mqtt_client.publish(root_topic + "unlock_response", 1)
 
 
 # improvement : get time to pair from mqtt call and set callback to publish a response
@@ -84,7 +85,7 @@ print("Connecting to broker ", broker)
 mqtt_client.connect(broker)
 
 
-mqtt_client.loop_start()
+#mqtt_client.loop_start()
 
 # ==============HTTP SETUP===============
 
@@ -101,6 +102,6 @@ app = Flask(__name__)
 api = Api(app)
 api.add_resource(Pairing, "/pair")
 
-app.run("127.0.0.1", 8080, use_reloader=False, debug=True)
+#app.run("127.0.0.1", 8080, use_reloader=False, debug=True)
 
-mqtt_client.loop_stop()
+mqtt_client.loop_forever()
