@@ -5,7 +5,7 @@ import time
 import detectFace
 import werkzeug
 import face_recognition
-import os
+import glob
 
 
 broker = "broker.mqttdashboard.com"
@@ -20,16 +20,26 @@ def unlock_door(payload):
 
     detectFace.take_webcam_photo(photoFilename)
 
-    known_image = face_recognition.load_image_file("jeteconnais/Chelmi.jpg")
     unknown_image = face_recognition.load_image_file(photoFilename)
+    unknowns_encoding = face_recognition.face_encodings(unknown_image)
 
-    biden_encoding = face_recognition.face_encodings(known_image)[0]
-    unknown_encoding = face_recognition.face_encodings(unknown_image)
+    whitelist = glob.glob("./whitelist/*/*.jpg")
 
-    for unknown_face in unknown_encoding:
-        results = face_recognition.compare_faces([biden_encoding], unknown_face)
-        print(results)
+    print(whitelist)
+    for people in whitelist:
+        print(people)
+        for unknown_encoding in unknowns_encoding:
+            print(unknown_encoding[0])
+            known_image = face_recognition.load_image_file(people)
+            biden_encoding = face_recognition.face_encodings(known_image)[0]
 
+            results = face_recognition.compare_faces([biden_encoding], unknown_encoding)
+            print(results)
+            if results[0] == True:
+                print("AUTHORIZED")
+                return
+
+    print("UNAUTHORIZED")
     mqtt_client.publish(root_topic + "unlock_response", 1)
 
 
