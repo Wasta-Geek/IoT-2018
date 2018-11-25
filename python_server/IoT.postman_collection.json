@@ -1,0 +1,105 @@
+{
+	"info": {
+		"_postman_id": "12007d9c-dfe2-4d73-b965-ee6d463a2062",
+		"name": "IoT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Pair",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"deviceId\": \"fred\"\n}"
+				},
+				"url": {
+					"raw": "localhost:5050/pair",
+					"host": [
+						"localhost"
+					],
+					"port": "5050",
+					"path": [
+						"pair"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "unlock",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"deviceId\": \"fred\",\n\t\"authorize\": 1\n}\n"
+				},
+				"url": {
+					"raw": "localhost:5050/unlock",
+					"host": [
+						"localhost"
+					],
+					"port": "5050",
+					"path": [
+						"unlock"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "whitelist",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "deviceId",
+							"value": "fred",
+							"type": "text"
+						},
+						{
+							"key": "name",
+							"value": "Antoine",
+							"type": "text"
+						},
+						{
+							"key": "picture",
+							"type": "file"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:5050/whitelist",
+					"host": [
+						"localhost"
+					],
+					"port": "5050",
+					"path": [
+						"whitelist"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

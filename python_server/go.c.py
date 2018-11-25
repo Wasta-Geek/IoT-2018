@@ -3,12 +3,15 @@ from flask import Flask
 from flask_restful import Api, Resource, reqparse
 import time
 import detectFace
+import werkzeug
 import face_recognition
+import os
+
 
 broker = "broker.mqttdashboard.com"
 root_topic = "doom_portal/"
 lastPairingAttempt = 0
-authenticatedDevices = []
+authenticatedDevices = ["fred"]
 photoFilename = "cam_photo.png"
 
 
@@ -16,17 +19,6 @@ def unlock_door(payload):
     print("Trying to unlock door with payload " + str(payload))
 
     detectFace.take_webcam_photo(photoFilename)
-
-#    print("Trying to unlock door with payload " + str(payload))
-#    faces = detectFace.get_faces("cafaitquoidegagnerleswarmupdays.jpg")
-#    if len(faces) == 0:
-#        print("No face detected")
-#        mqtt_client.publish(root_topic + "unlock_response", "NO FACE")
-#        return
-
-#    for face in faces:
-#        print("Testing a face")
-#    mqtt_client.publish(root_topic + "unlock_response", 1)
 
     known_image = face_recognition.load_image_file("jeteconnais/Chelmi.jpg")
     unknown_image = face_recognition.load_image_file(photoFilename)
@@ -49,13 +41,30 @@ def await_pairing(payload):
 
 
 # HTTP
-def manually_unlock_door(payload):
-    print("Trying to manually unlock door with payload " + str(payload))
+def manually_unlock_door(authorize, deviceId):
+    if deviceId not in authenticatedDevices:
+        return 403
+    if authorize in ['true', '1', 'y', 'True']:
+        mqtt_client.publish(root_topic + "unlock_response", "AUTHORIZE")
+    else:
+        mqtt_client.publish(root_topic + "unlock_response", "UNAUTHORIZE")
+    return 200
 
 
 # HTTP
-def feed_whitelist_info(payload):
-    print("Trying to manually unlock door with payload " + str(payload))
+def store_whitelist(deviceId, name, picture):
+    if deviceId not in authenticatedDevices:
+        return 403
+    if picture and name:
+        filename = name + ".jpg"
+        if not os.path.exists("whitelist"):
+            os.mkdir("whitelist")
+        if not os.path.exists(os.path.join("whitelist", name)):
+            os.mkdir(os.path.join("whitelist", name))
+        picture.save(os.path.join("whitelist", name, filename))
+        return 200
+    else:
+        return 400
 
 
 # HTTP
@@ -77,7 +86,6 @@ def confirm_pairing(deviceId):
 mqtt_protocol = {
     root_topic + "unlock_door": unlock_door,
     root_topic + "await_pairing": await_pairing,
-    # root_topic + "confirm_pairing": confirm_pairing
 }
 
 
@@ -92,15 +100,21 @@ def callback_connect(client, userdata, flags, response_code):
         client.subscribe(topic)
 
 
-mqtt_client = mqtt_client.Client("yuruh")
+def callback_disconnect(client, userdata, rc):
+    print("User disconnected with response code : ", str(rc))
+
+
+# set name if it keeps connecting and disconnecting
+mqtt_client = mqtt_client.Client()
 mqtt_client.on_connect = callback_connect
+mqtt_client.on_disconnect = callback_disconnect
 mqtt_client.on_message = callback_msg
 
 print("Connecting to broker ", broker)
 mqtt_client.connect(broker)
 
 
-#mqtt_client.loop_start()
+mqtt_client.loop_start()
 
 # ==============HTTP SETUP===============
 
@@ -113,10 +127,31 @@ class Pairing(Resource):
         return confirm_pairing(args["deviceId"])
 
 
+class ManualUnlock(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("authorize")
+        parser.add_argument("deviceId")
+        args = parser.parse_args()
+        return manually_unlock_door(args["authorize"], args["deviceId"])
+
+
+class FeedWhitelist(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("deviceId")
+        parser.add_argument('picture', type=werkzeug.datastructures.FileStorage, location='files')
+        parser.add_argument("name")
+        args = parser.parse_args()
+        return store_whitelist(args["deviceId"], args["name"], args["picture"])
+
+
 app = Flask(__name__)
 api = Api(app)
 api.add_resource(Pairing, "/pair")
+api.add_resource(ManualUnlock, "/unlock")
+api.add_resource(FeedWhitelist, "/whitelist")
 
-#app.run("127.0.0.1", 8080, use_reloader=False, debug=True)
+app.run("127.0.0.1", 5050, use_reloader=False, debug=True)
 
-mqtt_client.loop_forever()
+mqtt_client.loop_stop()
