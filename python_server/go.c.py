@@ -3,25 +3,26 @@ from flask import Flask
 from flask_restful import Api, Resource, reqparse
 import time
 import detectFace
+import face_recognition
 
 broker = "broker.mqttdashboard.com"
 root_topic = "doom_portal/"
 lastPairingAttempt = 0
 authenticatedDevices = []
 
-
 def unlock_door(payload):
     print("Trying to unlock door with payload " + str(payload))
-    # todo get image from payload
-    faces = detectFace.get_faces("cafaitquoidegagnerleswarmupdays.jpg")
-    if len(faces) == 0:
-        print("No face detected")
-        mqtt_client.publish(root_topic + "unlock_response", "NO FACE")
-        return
 
-    # todo voir ce qu'on envoit à l'API, faut peut être creer une image pour chaque face detecté
-    for face in faces:
-        print("Testing a face")
+    known_image = face_recognition.load_image_file("jeteconnais/babou.jpg")
+    unknown_image = face_recognition.load_image_file("jevaisteconnaitre/cafaitquoidegagnerleswarmupdays.jpg")
+
+    biden_encoding = face_recognition.face_encodings(known_image)[0]
+    unknown_encoding = face_recognition.face_encodings(unknown_image)
+
+    for unknown_face in unknown_encoding:
+        results = face_recognition.compare_faces([biden_encoding], unknown_face)
+        print(results)
+
     mqtt_client.publish(root_topic + "unlock_response", 1)
 
 
