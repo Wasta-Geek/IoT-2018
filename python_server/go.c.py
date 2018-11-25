@@ -3,16 +3,19 @@ from flask import Flask
 from flask_restful import Api, Resource, reqparse
 import time
 import detectFace
+import face_recognition
 
 broker = "broker.mqttdashboard.com"
 root_topic = "doom_portal/"
 lastPairingAttempt = 0
 authenticatedDevices = []
+photoFilename = "cam_photo.png"
 
 
 def unlock_door(payload):
+    print("Trying to unlock door with payload " + str(payload))
 
-    detectFace.take_webcam_photo("temp_cam_photo.png")
+    detectFace.take_webcam_photo(photoFilename)
 
 #    print("Trying to unlock door with payload " + str(payload))
 #    faces = detectFace.get_faces("cafaitquoidegagnerleswarmupdays.jpg")
@@ -24,6 +27,18 @@ def unlock_door(payload):
 #    for face in faces:
 #        print("Testing a face")
 #    mqtt_client.publish(root_topic + "unlock_response", 1)
+
+    known_image = face_recognition.load_image_file("jeteconnais/Chelmi.jpg")
+    unknown_image = face_recognition.load_image_file(photoFilename)
+
+    biden_encoding = face_recognition.face_encodings(known_image)[0]
+    unknown_encoding = face_recognition.face_encodings(unknown_image)
+
+    for unknown_face in unknown_encoding:
+        results = face_recognition.compare_faces([biden_encoding], unknown_face)
+        print(results)
+
+    mqtt_client.publish(root_topic + "unlock_response", 1)
 
 
 # improvement : get time to pair from mqtt call and set callback to publish a response
