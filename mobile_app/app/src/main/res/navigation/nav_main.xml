@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools" android:id="@+id/nav_main"
+            app:startDestination="@id/mainActivityFragment">
+
+    <fragment android:id="@+id/photoDetailFragment" android:name="iot.doom.com.doomPortal.PhotoDetailFragment"
+              android:label="PhotoDetailFragment" tools:layout="@layout/fragment_photo_detail">
+    </fragment>
+    <fragment android:id="@+id/mainActivityFragment" android:name="iot.doom.com.doomPortal.MainActivityFragment"
+              android:label="MainActivityFragment" tools:layout="@layout/fragment_photo_list">
+        <action android:id="@+id/photoListtoDetail" app:destination="@+id/photoDetailFragment"
+                app:popUpTo="@+id/mainActivityFragment"/>
+    </fragment>
+</navigation>
