@@ -1,11 +1,13 @@
 import paho.mqtt.client as mqtt_client
 from flask import Flask
-from flask_restful import Api, Resource, reqparse
+from flask_restful import Api, Resource, reqparse, abort
 import time
 import detectFace
 import werkzeug
 import face_recognition
+import glob
 import os
+import json
 
 
 broker = "broker.mqttdashboard.com"
@@ -20,17 +22,27 @@ def unlock_door(payload):
 
     detectFace.take_webcam_photo(photoFilename)
 
-    known_image = face_recognition.load_image_file("jeteconnais/Chelmi.jpg")
     unknown_image = face_recognition.load_image_file(photoFilename)
+    unknowns_encoding = face_recognition.face_encodings(unknown_image)
 
-    biden_encoding = face_recognition.face_encodings(known_image)[0]
-    unknown_encoding = face_recognition.face_encodings(unknown_image)
+    whitelist = glob.glob("./whitelist/*/*.jpg")
 
-    for unknown_face in unknown_encoding:
-        results = face_recognition.compare_faces([biden_encoding], unknown_face)
-        print(results)
+    print(whitelist)
+    for people in whitelist:
+        print(people)
+        for unknown_encoding in unknowns_encoding:
+            print(unknown_encoding[0])
+            known_image = face_recognition.load_image_file(people)
+            biden_encoding = face_recognition.face_encodings(known_image)[0]
 
-    mqtt_client.publish(root_topic + "unlock_response", 1)
+            results = face_recognition.compare_faces([biden_encoding], unknown_encoding)
+            print(results)
+            if results[0]:
+                mqtt_client.publish(root_topic + "unlock_response", "AUTHORIZED")
+                print("AUTHORIZED")
+                return
+
+    mqtt_client.publish(root_topic + "unlock_response", "UNAUTHORIZED")
 
 
 # improvement : get time to pair from mqtt call and set callback to publish a response
@@ -43,34 +55,38 @@ def await_pairing(payload):
 # HTTP
 def manually_unlock_door(authorize, deviceId):
     if deviceId not in authenticatedDevices:
-        return 403
+        abort(401)
     if authorize in ['true', '1', 'y', 'True']:
-        mqtt_client.publish(root_topic + "unlock_response", "AUTHORIZE")
+        mqtt_client.publish(root_topic + "unlock_response", "AUTHORIZED")
     else:
-        mqtt_client.publish(root_topic + "unlock_response", "UNAUTHORIZE")
-    return 200
+        mqtt_client.publish(root_topic + "unlock_response", "UNAUTHORIZED")
 
 
 def get_whitelist(deviceId):
     if deviceId not in authenticatedDevices:
-        return 403
-    return ['Antoine']
+        abort(401)
+    print("deviceId " + str(deviceId))
+    ret = []
+    persons = os.listdir("./whitelist")
+    for person in persons:
+        json_object = {'name': person, 'photoUrl': 'work in progress'}
+        ret.append(json_object)
+    return ret
 
 
 # HTTP
 def store_whitelist(deviceId, name, picture):
     if deviceId not in authenticatedDevices:
-        return 403
-    if picture and name:
+        abort(401)
+    if picture and name and name not in os.listdir('./whitelist'):
         filename = name + ".jpg"
         if not os.path.exists("whitelist"):
             os.mkdir("whitelist")
         if not os.path.exists(os.path.join("whitelist", name)):
             os.mkdir(os.path.join("whitelist", name))
         picture.save(os.path.join("whitelist", name, filename))
-        return 200
     else:
-        return 400
+        abort(403)
 
 
 # HTTP
@@ -78,13 +94,14 @@ def confirm_pairing(deviceId):
     print("Trying to confirm device pairing")
     if time.time() - lastPairingAttempt > 10:
         print("Did not authorize " + deviceId + " to access API because the last pairing attempt is too old")
-        return 403
+        abort(403)
     if deviceId in authenticatedDevices:
         print("Did not authorize " + deviceId + " to access API because the device ID is already registered")
-        return 409
+        abort(409)
     authenticatedDevices.append(deviceId)
     print("Authorized " + deviceId + " to access API")
-    return 201
+    mqtt_client.publish(root_topic + "result_pairing", "PAIRED")
+    return deviceId, 201
 
 
 # ==============MQTT SETUP===============
@@ -137,26 +154,25 @@ class ManualUnlock(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument("authorize")
-        parser.add_argument("deviceId")
+        parser.add_argument("Authorization", location='headers')
         args = parser.parse_args()
-        return manually_unlock_door(args["authorize"], args["deviceId"])
+        return manually_unlock_door(args["authorize"], args["Authorization"])
 
 
 class Whitelist(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument("Authorization", location='headers')
-        parser.add_argument("name")
         args = parser.parse_args()
         return get_whitelist(args["Authorization"])
 
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("deviceId")
+        parser.add_argument("Authorization", location='headers')
         parser.add_argument('picture', type=werkzeug.datastructures.FileStorage, location='files')
         parser.add_argument("name")
         args = parser.parse_args()
-        return store_whitelist(args["deviceId"], args["name"], args["picture"])
+        return store_whitelist(args["Authorization"], args["name"], args["picture"])
 
 
 app = Flask(__name__)
