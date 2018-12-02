@@ -51,6 +51,12 @@ def manually_unlock_door(authorize, deviceId):
     return 200
 
 
+def get_whitelist(deviceId):
+    if deviceId not in authenticatedDevices:
+        return 403
+    return ['Antoine']
+
+
 # HTTP
 def store_whitelist(deviceId, name, picture):
     if deviceId not in authenticatedDevices:
@@ -136,7 +142,14 @@ class ManualUnlock(Resource):
         return manually_unlock_door(args["authorize"], args["deviceId"])
 
 
-class FeedWhitelist(Resource):
+class Whitelist(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("Authorization", location='headers')
+        parser.add_argument("name")
+        args = parser.parse_args()
+        return get_whitelist(args["Authorization"])
+
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument("deviceId")
@@ -150,7 +163,7 @@ app = Flask(__name__)
 api = Api(app)
 api.add_resource(Pairing, "/pair")
 api.add_resource(ManualUnlock, "/unlock")
-api.add_resource(FeedWhitelist, "/whitelist")
+api.add_resource(Whitelist, "/whitelist")
 
 app.run("127.0.0.1", 5050, use_reloader=False, debug=True)
 
