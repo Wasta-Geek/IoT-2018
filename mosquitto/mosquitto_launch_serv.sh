@@ -2,7 +2,7 @@
 
 if [ ! -f passwd ];
 then
-   echo "Password hasn't been set";
-else
-    mosquitto -v -c doom-mosquitto.conf
+    touch passwd
+    mosquitto_passwd -b passwd Iot-of-doom-admin doomdoomdoom
 fi
+mosquitto -v -c doom-mosquitto.conf
