@@ -10,7 +10,7 @@ import os
 import json
 
 
-broker = "broker.mqttdashboard.com"
+broker = "127.0.0.1"
 root_topic = "doom_portal/"
 lastPairingAttempt = 0
 authenticatedDevices = ["fred"]
@@ -134,6 +134,7 @@ mqtt_client.on_disconnect = callback_disconnect
 mqtt_client.on_message = callback_msg
 
 print("Connecting to broker ", broker)
+mqtt_client.username_pw_set("Iot-of-doom-admin", password="doomdoomdoom")
 mqtt_client.connect(broker)
 
 
