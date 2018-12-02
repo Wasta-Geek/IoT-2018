@@ -10,8 +10,8 @@
 
 #define MQTT_SERVER       IPAddress(192, 168, 0, 14)
 #define MQTT_PORT         1883
-#define MQTT_USER         "wasta-geek"
-#define MQTT_PASSWORD     "root"
+#define MQTT_USER         "Iot-of-doom-admin"
+#define MQTT_PASSWORD     "doomdoomdoom"
 
 #define DATA_LED_PIN      4
 #define NUM_LEDS          1
@@ -34,6 +34,7 @@ CRGB leds[NUM_LEDS];
 
 bool isUnlocking = false;
 bool isPairing = false;
+bool isConnected = false;
 
 void unlockDoorTopicManager(char data[])
 {
