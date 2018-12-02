@@ -7,6 +7,7 @@ import werkzeug
 import face_recognition
 import glob
 import os
+import base64
 import json
 
 
@@ -65,12 +66,14 @@ def manually_unlock_door(authorize, deviceId):
 def get_whitelist(deviceId):
     if deviceId not in authenticatedDevices:
         abort(401)
-    print("deviceId " + str(deviceId))
     ret = []
     persons = os.listdir("./whitelist")
     for person in persons:
-        json_object = {'name': person, 'photoUrl': 'work in progress'}
-        ret.append(json_object)
+        with open(os.path.join("whitelist", person, person + ".jpg"), "rb") as image_file:
+            byte_content = image_file.read()
+            encoded = base64.b64encode(byte_content)
+            json_object = {'name': person, 'photoBase64': encoded.decode("utf-8")}
+            ret.append(json_object)
     return ret
 
 
