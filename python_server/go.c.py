@@ -88,6 +88,7 @@ def confirm_pairing(deviceId):
         return 409
     authenticatedDevices.append(deviceId)
     print("Authorized " + deviceId + " to access API")
+    mqtt_client.publish(root_topic + "result_pairing", "PAIRED");
     return 201
 
 
