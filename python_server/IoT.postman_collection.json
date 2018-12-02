@@ -17,7 +17,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"deviceId\": \"fred\"\n}"
+					"raw": "{\n\t\"deviceId\": \"antoine\"\n}"
 				},
 				"url": {
 					"raw": "localhost:5050/pair",
@@ -40,11 +40,15 @@
 					{
 						"key": "Content-Type",
 						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "fred"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"deviceId\": \"fred\",\n\t\"authorize\": 1\n}\n"
+					"raw": "{\n\t\"authorize\": 1\n}\n"
 				},
 				"url": {
 					"raw": "localhost:5050/unlock",
@@ -60,13 +64,58 @@
 			"response": []
 		},
 		{
-			"name": "whitelist",
+			"name": "add person to whitelist",
 			"request": {
 				"method": "POST",
 				"header": [
 					{
 						"key": "Content-Type",
 						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "fred"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "Jack",
+							"type": "text"
+						},
+						{
+							"key": "picture",
+							"type": "file"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:5050/whitelist",
+					"host": [
+						"localhost"
+					],
+					"port": "5050",
+					"path": [
+						"whitelist"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get whitelist",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "fred"
 					}
 				],
 				"body": {
