@@ -9,7 +9,14 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_add_photo.*
 import android.content.Intent
+import android.provider.Settings
 import android.util.Log
+import okhttp3.MediaType
+import okhttp3.RequestBody
+import okhttp3.MultipartBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class AddPhotoFragment : Fragment() {
 
@@ -38,9 +45,42 @@ class AddPhotoFragment : Fragment() {
 
         addPhoto.setOnClickListener {
             // TODO send to server
+
             findNavController().navigateUp()
         }
     }
+
+    /*fun uploadImage() {
+
+        // create RequestBody instance from file
+        val requestFile = RequestBody.create(
+            MediaType.parse(getContentResolver().getType(fileUri)),
+            file
+        )
+
+        // MultipartBody.Part is used to send also the actual file name
+        val body = MultipartBody.Part.createFormData("picture", file.getName(), requestFile)
+
+        // add another part within the multipart request
+        val descriptionString = "hello, this is description speaking"
+
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("picture", "")
+            .addFormDataPart("name", photoNameInput.text.toString())
+            .build()
+
+        DoomApi.instance.addWhitelist(Settings.Secure.getString(context!!.contentResolver, Settings.Secure.ANDROID_ID), requestBody).enqueue(object : Callback<Unit> {
+            override fun onFailure(call: Call<Unit>, t: Throwable) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+        })
+    }*/
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

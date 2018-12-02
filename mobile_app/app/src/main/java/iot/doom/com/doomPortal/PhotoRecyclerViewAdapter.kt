@@ -1,22 +1,18 @@
 package iot.doom.com.doomPortal
 
+import android.content.Context
+import android.util.Base64
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.view.ViewCompat
+import com.bumptech.glide.Glide
 
-
-import iot.doom.com.doomPortal.dummy.DummyContent.DummyItem
-
-/**
- * [RecyclerView.Adapter] that can display a [DummyItem] and makes a call to the
- * specified [OnListFragmentInteractionListener].
- * TODO: Replace the implementation with code for your data type.
- */
 class PhotoRecyclerViewAdapter(
-    private val mValues: List<DummyItem>,
+    private val mValues: List<DoomPhoto>,
     private val mListener: OnListFragmentInteractionListener
 ) : RecyclerView.Adapter<PhotoRecyclerViewAdapter.ViewHolder>() {
 
@@ -28,9 +24,15 @@ class PhotoRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mValues[position]
-        // holder.mIdView.text = item.id
-        // holder.mContentView.text = item.content
-        ViewCompat.setTransitionName(holder.mImageView, "photo_" + item.id)
+        val photo = Base64.decode(item.photoBase64, Base64.DEFAULT)
+        if (photo != null) {
+            Glide.with(holder.context)
+                .asBitmap()
+                .load(photo)
+                .into(holder.mImageView)
+        }
+        holder.mTextView.text = item.name
+        ViewCompat.setTransitionName(holder.mImageView, "photo_" + item.name)
 
         with(holder.mView) {
             tag = item
@@ -43,12 +45,8 @@ class PhotoRecyclerViewAdapter(
     override fun getItemCount(): Int = mValues.size
 
     inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
-        // val mIdView: TextView = mView.item_number
-        // val mContentView: TextView = mView.content
+        val context: Context = mView.context
         val mImageView: ImageView = mView.findViewById(R.id.photo)
-
-        override fun toString(): String {
-            return super.toString()// + " '" + mContentView.text + "'"
-        }
+        val mTextView: TextView = mView.findViewById(R.id.photoName)
     }
 }

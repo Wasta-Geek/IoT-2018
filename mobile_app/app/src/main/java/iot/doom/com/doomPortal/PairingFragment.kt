@@ -60,7 +60,7 @@ class PairingFragment : Fragment() {
                     override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
                         Log.d("Connection", response.raw().code().toString())
                         if (response.isSuccessful) findNavController().navigate(R.id.action_successful_pairing)
-                        else Toast.makeText(context, response.code(), Toast.LENGTH_SHORT).show()// TODO exploit error
+                        //else Toast.makeText(context, response.code(), Toast.LENGTH_SHORT).show()// TODO exploit error
                     }
 
                 })

@@ -2,6 +2,7 @@ package iot.doom.com.doomPortal
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -21,10 +22,10 @@ interface DoomApi {
     fun authorize(@Header("Authorization") deviceId: String, @Body request: AuthorizeRequest): Call<Unit>
 
     @GET("whitelist")
-    fun getWhitelist(@Header("Authorization") deviceId: String): Call<DoomPhoto>
+    fun getWhitelist(@Header("Authorization") deviceId: String): Call<List<DoomPhoto>>
 
     @POST("whitelist")
-    fun addWhitelist(@Header("Authorization") deviceId: String, @Body request: WhitelistRequest): Call<Unit>
+    fun addWhitelist(@Header("Authorization") deviceId: String, @Body request: MultipartBody): Call<Unit>
 
     companion object {
         val instance: DoomApi by lazy {
