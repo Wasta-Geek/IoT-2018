@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="wrap_content"
+              android:layout_height="wrap_content" xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="horizontal">
 
     <com.google.android.material.card.MaterialCardView
-            android:elevation="6dp"
+            android:elevation="16dp"
+            android:backgroundTint="@color/primaryTextColor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp">
+            app:cardCornerRadius="0dp"
+            android:layout_marginTop="0dp" android:layout_marginBottom="16dp" android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp">
 
         <LinearLayout
                 android:layout_width="match_parent"
@@ -20,7 +23,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="160dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/doom" />
+                    android:src="@drawable/doom"/>
 
             <LinearLayout
                     android:layout_width="match_parent"
@@ -32,46 +35,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Titre"
+                        android:text="Nom de la personne"
                         android:textColor="#000"
-                        android:textSize="18sp" />
-
-                <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Contenu"
-                        android:textColor="#555" />
+                        android:textSize="18sp"
+                        android:fontFamily="@font/roboto"/>
             </LinearLayout>
 
-            <!--LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Share"
-                        android:theme="@style/PrimaryFlatButton" />
-
-                <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Explore"
-                        android:theme="@style/PrimaryFlatButton" />
-            </LinearLayout-->
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-    <!--TextView
-            android:id="@+id/item_number"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/text_margin"
-            android:textAppearance="?attr/textAppearanceListItem"/>
-
-    <TextView
-            android:id="@+id/content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/text_margin"
-            android:textAppearance="?attr/textAppearanceListItem"/-->
 </LinearLayout>

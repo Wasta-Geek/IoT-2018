@@ -3,6 +3,7 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents">
         <!-- Customize your theme here. -->
+        <item name="android:statusBarColor">@color/statusBarColor</item>
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="colorAccent">@color/primaryLightColor</item>
@@ -10,7 +11,7 @@
         <item name="android:textColorPrimaryInverse">@color/primaryTextColor</item>
         <item name="android:textColorPrimary">@color/primaryTextColor</item>
         <item name="android:textColorSecondary">#757575</item>
-        <item name="android:colorBackground">@color/primaryTextColor</item>
+        <item name="android:colorBackground">@color/primaryDarkColor</item>
     </style>
     <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>

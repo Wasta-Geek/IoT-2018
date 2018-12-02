@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionInflater
-import kotlinx.android.synthetic.main.fragment_main.*
+import kotlinx.android.synthetic.main.main_backdrop.*
 
 /**
  * A placeholder fragment containing a simple view.
@@ -26,8 +26,13 @@ class MainActivityFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fab.setOnClickListener {
-            findNavController().navigate(R.id.photoListtoDetail)
+
+        addPerson.setOnClickListener {
+            findNavController().navigate(R.id.action_add_photo)
+        }
+
+        disconnect.setOnClickListener {
+            findNavController().navigate(R.id.action_disconnect)
         }
     }
 }
