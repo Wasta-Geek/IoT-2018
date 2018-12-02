@@ -15,26 +15,32 @@
 
 #define DATA_LED_PIN      4
 #define NUM_LEDS          1
-#define DATA_PIR_PIN      D5
-#define BUTTON_PIN        A0
-#define THRESHOLD         100
+#define BUTTON_PIN        D5
+#define DATA_PIR_PIN      D6
 
-#define MIN_PAIRING_TIME  10
+#define MIN_PAIRING_TIME  10000
 
-#define PAIRING_TOPIC     "doom_portal/await_pairing"
-#define UNLOCK_DOOR_TOPIC "doom_portal/unlock_response"
+// Published topics
+#define P_PAIRING_TOPIC   "doom_portal/await_pairing"
+#define P_UNLOCK_TOPIC    "doom_portal/unlock_door"
+
+// Subscribed topics
+#define S_UNLOCK_TOPIC    "doom_portal/unlock_response"
+#define S_PAIRING_TOPIC   "doom_portal/result_pairing"
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 CRGB leds[NUM_LEDS];
 
-bool isMotionDetected = false;
+bool isUnlocking = false;
+bool isPairing = false;
 
 void unlockDoorTopicManager(char data[])
 {
   Serial.print("UNLOCK_RESPONSE: ");
   Serial.println(data);
   FastLED.clear();
+  isUnlocking = false;
   static unsigned long minTimeBlinking = 4000;
   // Refuse
   if (strcmp(data, "UNAUTHORIZED") == 0)
@@ -75,12 +81,17 @@ void unlockDoorTopicManager(char data[])
   changeLEDColor(CRGB::Green);
 }
 
-void motionDetected()
+void pairingTopicManager()
 {
-  isMotionDetected = true;
-  leds[0] = CRGB::Red; FastLED.show(); delay(100);
-  leds[0] = CRGB::Green; FastLED.show(); delay(100);
-  leds[0] = CRGB::Blue; FastLED.show(); delay(100);
+  unsigned long start_time = millis();
+  while (millis() - start_time <= 1000)
+  {
+    changeLEDColor(CRGB::White);
+    delay(200);
+    changeLEDColor(CRGB::Green);
+    delay(200);
+  }
+  isPairing = false;
 }
 
 void message_received(char* topic, byte* payload, unsigned int length)
@@ -90,38 +101,20 @@ void message_received(char* topic, byte* payload, unsigned int length)
   Serial.println(topic);
 
 
-  char data[length];
+  char data[length + 1];
   Serial.print("Message:");
   for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
     data[i] = payload[i];
   }
+  data[length] = '\0';
   Serial.println();
 
-  if (strcmp(topic, UNLOCK_DOOR_TOPIC) == 0)
+  if (strcmp(topic, S_UNLOCK_TOPIC) == 0)
     unlockDoorTopicManager(data);
+  else if (strcmp(topic, S_PAIRING_TOPIC) == 0)
+    pairingTopicManager();
   Serial.println("-----------------------");
-}
-
-void do_connect()
-{
-  // Create a random client ID
-  String clientId = "ESP8266Client-";
-  clientId += String(random(0xffff), HEX);
-  Serial.println("Connecting to MQTT...");
-  if (client.connect(clientId.c_str(), MQTT_USER, MQTT_PASSWORD))
-  {
-    Serial.println("connected");
-    client.subscribe(UNLOCK_DOOR_TOPIC);
-    client.subscribe(PAIRING_TOPIC);
-  }
-  else
-  {
-    Serial.print(client.state());
-    Serial.print("failed with state ");
-    Serial.print(client.state());
-    delay(2000);
-  }
 }
 
 void clearLED()
@@ -182,27 +175,87 @@ void doWifiReconnect()
   changeLEDColor(CRGB::Green);
 }
 
+void do_connect()
+{
+  // Create a random client ID
+  String clientId = "ESP8266Client-";
+  clientId += String(random(0xffff), HEX);
+  Serial.println("Connecting to MQTT...");
+  if (client.connect(clientId.c_str(), MQTT_USER, MQTT_PASSWORD))
+  {
+    Serial.println("connected");
+    client.subscribe(S_UNLOCK_TOPIC);
+    client.subscribe(S_PAIRING_TOPIC);
+  }
+  else
+  {
+    Serial.print(client.state());
+    Serial.print("failed with state ");
+    Serial.print(client.state());
+    delay(2000);
+  }
+}
+
 void loop() {
   static unsigned long timeSinceLastPairing = 0;
+  static unsigned long timeSinceLastUnlocking = 0;
 
   if (WiFi.status() != WL_CONNECTED)
     doWifiReconnect();
-  while (!client.connected())
+  if (!client.connected())
   {
-    Serial.println("Not connected");
-    do_connect();
+    changeLEDColor(CRGB::Red);
+    while (!client.connected())
+    {
+      Serial.println("Not connected");
+      do_connect();
+    }
+    changeLEDColor(CRGB::Green);
   }
-  if (analogRead(BUTTON_PIN) > THRESHOLD) && millis() - timeSinceLastPairing > MIN_PAIRING_TIME)
+  if (isPairing == false && digitalRead(BUTTON_PIN) == LOW)
   {
-    client.publish(PAIRING_TOPIC, "PAIRING");
+    isPairing = true;
+    client.publish(P_PAIRING_TOPIC, "PAIRING");
     timeSinceLastPairing = millis();
   }
-  /*int PIR_value = digitalRead(DATA_PIR_PIN);
-    if (PIR_value == HIGH)
+  else if (isPairing == true)
+  {
+    unsigned long currentTime = millis();
+    if (currentTime - timeSinceLastPairing < MIN_PAIRING_TIME)
     {
-    Serial.print("PIR value: ");
-    Serial.println(PIR_value);
-    }*/
-  //delay(250);
+      static unsigned long timeSinceLastBlink = 0;
+      if (currentTime - timeSinceLastBlink > 1500 || timeSinceLastBlink == 0)
+      {
+        timeSinceLastBlink = currentTime;
+        changeLEDColor(CRGB::White);
+        delay(500);
+      }
+    }
+    else
+    {
+      isPairing = false;
+      changeLEDColor(CRGB::Red);
+      delay(1000);
+    }
+    changeLEDColor(CRGB::Green);
+  }
+  if (!isUnlocking && digitalRead(DATA_PIR_PIN) == 1 && millis() - timeSinceLastUnlocking > 5000)
+  {
+    Serial.println("Unlocking...");
+    client.publish(P_UNLOCK_TOPIC, "UNLOCK");
+    isUnlocking = true;
+    timeSinceLastUnlocking = millis();
+  }
+  else if (isUnlocking)
+  {
+    static unsigned long timeSinceLastBlinkUnlocking = 0;
+    unsigned long currentTime = millis();
+    if (currentTime - timeSinceLastBlinkUnlocking > 1500 || timeSinceLastBlinkUnlocking == 0)
+    {
+      timeSinceLastBlinkUnlocking = currentTime;
+      changeLEDColor(CRGB::Yellow);
+      delay(500);
+    }
+  }
   client.loop();
 }
