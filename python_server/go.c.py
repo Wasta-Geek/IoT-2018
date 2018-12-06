@@ -1,3 +1,7 @@
+import os
+
+os.environ['CLOUDINARY_URL'] = "cloudinary://584812496861958:Y9f-WHpXczrM0C0WjfP7PB6MQEo@dnpgw8jbn"
+
 import paho.mqtt.client as mqtt_client
 from flask import Flask
 from flask_restful import Api, Resource, reqparse, abort
@@ -6,21 +10,57 @@ import detectFace
 import werkzeug
 import face_recognition
 import glob
-import os
 import base64
-import json
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
+from cloudinary import CloudinaryImage
+from pyfcm import FCMNotification
+import uuid
 
-
-broker = "127.0.0.1"
+broker = "broker.mqttdashboard.com"
 root_topic = "doom_portal/"
 lastPairingAttempt = 0
 authenticatedDevices = ["fred"]
 photoFilename = "cam_photo.png"
 
+push_service = FCMNotification(api_key="AAAAY0ath8E:APA91bHYBjrFZvTUSeL5ieVdeRvqMHauBDSCvgeV19jdxznTbZvVTfVKArgc1P8cUeNOskV3cZzQQa2rq0QiN3rh0FQ3D1wWlk8-g2EAgnwyhZlSp0rzCxf7r5cgMc4RJJk_7uptG-te")
+registration_id = "dvmcekOlNpE:APA91bGFEN7km3aPM_Qd-nVAJdoHHTMK7C7a8OozPyIgo2umzolDoEXIapoVaba2JNl3Fdi8tttNv_PbKPHe0BYxZHgYebr8V5anNQVnFjQxVEcE5WgA_2znZ8LDoj6NGtWc7AREVEET"
+
+# cloudinary_api_key = "584812496861958"
+# cloudinary_api_secret = "Y9f-WHpXczrM0C0WjfP7PB6MQEo"
+# cloudinary_URL =
+
+
+def upload_existing_whitelist():
+    print("Uploading whitelist folder ...")
+    for person in os.listdir("./whitelist"):
+        upload(os.path.join("whitelist", person, person + ".jpg"), public_id=person)
+        # path = os.path.join("whitelist", person, person + ".jpg")
+
+
+upload_existing_whitelist()
+
 
 def unlock_door(payload):
     print("Trying to unlock door with payload " + str(payload))
 
+    # SALUT BABOU
+    # Pour avoir l'url, tu fais cette commande :
+    # photo_url, options = cloudinary_url(person, format="jpg", crop="fill")
+    # la variable person c'est le nom du gars, qui doit être celui du folder (genre "Babou")
+    # après tu l'as dans photo_url et c'est GG
+    # si tu veux un exemple va voir dans le get_whitelist
+
+    message_title = "UN HIBOU"
+    data_message = {
+        "data": {
+            "url": "https://cloud.netlifyusercontent.com/assets/344dbf88-fdf9-42bb-adb4-46f01eedd629/242ce817-97a3-48fe-9acd-b1bf97930b01/09-posterization-opt.jpg"
+        }
+    }
+
+    push_service.notify_single_device(registration_id=registration_id, message_title=message_title, data_message=data_message)
+
+    return
     detectFace.take_webcam_photo(photoFilename)
 
     unknown_image = face_recognition.load_image_file(photoFilename)
@@ -28,7 +68,6 @@ def unlock_door(payload):
 
     whitelist = glob.glob("./whitelist/*/*.jpg")
 
-    print(whitelist)
     for people in whitelist:
         print(people)
         for unknown_encoding in unknowns_encoding:
@@ -69,11 +108,15 @@ def get_whitelist(deviceId):
     ret = []
     persons = os.listdir("./whitelist")
     for person in persons:
-        with open(os.path.join("whitelist", person, person + ".jpg"), "rb") as image_file:
-            byte_content = image_file.read()
-            encoded = base64.b64encode(byte_content)
-            json_object = {'name': person, 'photoBase64': encoded.decode("utf-8")}
-            ret.append(json_object)
+        photo_url, options = cloudinary_url(person, format="jpg", crop="fill")
+        json_object = {'name': person, 'photoUrl': photo_url}
+        ret.append(json_object)
+
+        #        with open(os.path.join("whitelist", person, person + ".jpg"), "rb") as image_file:
+#            byte_content = image_file.read()
+#            encoded = base64.b64encode(byte_content)
+#           json_object = {'name': person, 'photoUrl': encoded.decode("utf-8")}
+#            ret.append(json_object)
     return ret
 
 
@@ -81,13 +124,17 @@ def get_whitelist(deviceId):
 def store_whitelist(deviceId, name, picture):
     if deviceId not in authenticatedDevices:
         abort(401)
-    if picture and name and name not in os.listdir('./whitelist'):
+    if picture and name:  # and name not in os.listdir('./whitelist'):
         filename = name + ".jpg"
         if not os.path.exists("whitelist"):
             os.mkdir("whitelist")
         if not os.path.exists(os.path.join("whitelist", name)):
             os.mkdir(os.path.join("whitelist", name))
-        picture.save(os.path.join("whitelist", name, filename))
+        path = os.path.join("whitelist", name, filename)
+        picture.save(path)
+        upload_result = upload(path, public_id=name)
+#        thumbnail_url1, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill")
+ #       print(str(thumbnail_url1))
     else:
         abort(403)
 
@@ -140,8 +187,8 @@ print("Connecting to broker ", broker)
 mqtt_client.username_pw_set("Iot-of-doom-admin", password="doomdoomdoom")
 mqtt_client.connect(broker)
 
-
 mqtt_client.loop_start()
+
 
 # ==============HTTP SETUP===============
 
