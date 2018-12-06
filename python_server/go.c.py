@@ -1,3 +1,7 @@
+import os
+
+os.environ['CLOUDINARY_URL'] = "cloudinary://584812496861958:Y9f-WHpXczrM0C0WjfP7PB6MQEo@dnpgw8jbn"
+
 import paho.mqtt.client as mqtt_client
 from flask import Flask
 from flask_restful import Api, Resource, reqparse, abort
@@ -6,8 +10,9 @@ import detectFace
 import werkzeug
 import face_recognition
 import glob
-import os
 import base64
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
 from pyfcm import FCMNotification
 import uuid
 
@@ -19,6 +24,11 @@ photoFilename = "cam_photo.png"
 
 push_service = FCMNotification(api_key="AAAAY0ath8E:APA91bHYBjrFZvTUSeL5ieVdeRvqMHauBDSCvgeV19jdxznTbZvVTfVKArgc1P8cUeNOskV3cZzQQa2rq0QiN3rh0FQ3D1wWlk8-g2EAgnwyhZlSp0rzCxf7r5cgMc4RJJk_7uptG-te")
 registration_id = "dvmcekOlNpE:APA91bGFEN7km3aPM_Qd-nVAJdoHHTMK7C7a8OozPyIgo2umzolDoEXIapoVaba2JNl3Fdi8tttNv_PbKPHe0BYxZHgYebr8V5anNQVnFjQxVEcE5WgA_2znZ8LDoj6NGtWc7AREVEET"
+
+# cloudinary_api_key = "584812496861958"
+# cloudinary_api_secret = "Y9f-WHpXczrM0C0WjfP7PB6MQEo"
+# cloudinary_URL =
+
 
 def unlock_door(payload):
     print("Trying to unlock door with payload " + str(payload))
@@ -91,13 +101,17 @@ def get_whitelist(deviceId):
 def store_whitelist(deviceId, name, picture):
     if deviceId not in authenticatedDevices:
         abort(401)
-    if picture and name and name not in os.listdir('./whitelist'):
+    if picture and name:  # and name not in os.listdir('./whitelist'):
         filename = name + ".jpg"
         if not os.path.exists("whitelist"):
             os.mkdir("whitelist")
         if not os.path.exists(os.path.join("whitelist", name)):
             os.mkdir(os.path.join("whitelist", name))
-        picture.save(os.path.join("whitelist", name, filename))
+        path = os.path.join("whitelist", name, filename)
+        picture.save(path)
+        upload_result = upload(path)
+        thumbnail_url1, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill")
+        print(str(thumbnail_url1))
     else:
         abort(403)
 
@@ -150,8 +164,8 @@ print("Connecting to broker ", broker)
 mqtt_client.username_pw_set("Iot-of-doom-admin", password="doomdoomdoom")
 mqtt_client.connect(broker)
 
-
 mqtt_client.loop_start()
+
 
 # ==============HTTP SETUP===============
 
