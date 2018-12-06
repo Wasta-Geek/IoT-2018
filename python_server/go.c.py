@@ -13,6 +13,7 @@ import glob
 import base64
 from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
+from cloudinary import CloudinaryImage
 from pyfcm import FCMNotification
 import uuid
 
@@ -30,8 +31,25 @@ registration_id = "dvmcekOlNpE:APA91bGFEN7km3aPM_Qd-nVAJdoHHTMK7C7a8OozPyIgo2umz
 # cloudinary_URL =
 
 
+def upload_existing_whitelist():
+    print("Uploading whitelist folder ...")
+    for person in os.listdir("./whitelist"):
+        upload(os.path.join("whitelist", person, person + ".jpg"), public_id=person)
+        # path = os.path.join("whitelist", person, person + ".jpg")
+
+
+upload_existing_whitelist()
+
+
 def unlock_door(payload):
     print("Trying to unlock door with payload " + str(payload))
+
+    # SALUT BABOU
+    # Pour avoir l'url, tu fais cette commande :
+    # photo_url, options = cloudinary_url(person, format="jpg", crop="fill")
+    # la variable person c'est le nom du gars, qui doit être celui du folder (genre "Babou")
+    # après tu l'as dans photo_url et c'est GG
+    # si tu veux un exemple va voir dans le get_whitelist
 
     message_title = "UN HIBOU"
     data_message = {
@@ -90,11 +108,15 @@ def get_whitelist(deviceId):
     ret = []
     persons = os.listdir("./whitelist")
     for person in persons:
-        with open(os.path.join("whitelist", person, person + ".jpg"), "rb") as image_file:
-            byte_content = image_file.read()
-            encoded = base64.b64encode(byte_content)
-            json_object = {'name': person, 'photoBase64': encoded.decode("utf-8")}
-            ret.append(json_object)
+        photo_url, options = cloudinary_url(person, format="jpg", crop="fill")
+        json_object = {'name': person, 'photoUrl': photo_url}
+        ret.append(json_object)
+
+        #        with open(os.path.join("whitelist", person, person + ".jpg"), "rb") as image_file:
+#            byte_content = image_file.read()
+#            encoded = base64.b64encode(byte_content)
+#           json_object = {'name': person, 'photoUrl': encoded.decode("utf-8")}
+#            ret.append(json_object)
     return ret
 
 
@@ -110,9 +132,9 @@ def store_whitelist(deviceId, name, picture):
             os.mkdir(os.path.join("whitelist", name))
         path = os.path.join("whitelist", name, filename)
         picture.save(path)
-        upload_result = upload(path)
-        thumbnail_url1, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill")
-        print(str(thumbnail_url1))
+        upload_result = upload(path, public_id=name)
+#        thumbnail_url1, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill")
+ #       print(str(thumbnail_url1))
     else:
         abort(403)
 
