@@ -4,4 +4,5 @@
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="photo_transition">photo</string>
+    <string name="title_activity_photo_detail_actity">PhotoDetailActity</string>
 </resources>

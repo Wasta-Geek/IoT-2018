@@ -10,15 +10,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:id="@+id/addPerson" android:textAlignment="center"
             android:fontFamily="@font/roboto_medium" android:textSize="18sp" android:focusable="true"
-            android:paddingTop="12sp" android:paddingBottom="12sp"/>
-    <TextView
-            android:text="Notifications"
-            android:clickable="true"
-            android:background="?android:attr/selectableItemBackground"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/notifs" android:textAlignment="center"
-            android:fontFamily="@font/roboto_medium" android:textSize="18sp" android:focusable="true"
-            android:paddingTop="12sp" android:paddingBottom="12sp"/>
+            android:paddingTop="18sp" android:paddingBottom="18sp" android:layout_marginTop="10sp"/>
     <TextView
             android:text="Déconnexion"
             android:clickable="true"
@@ -26,5 +18,5 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:id="@+id/disconnect" android:textAlignment="center"
             android:fontFamily="@font/roboto_medium" android:textSize="18sp" android:focusable="true"
-            android:paddingTop="12sp" android:paddingBottom="12sp"/>
+            android:paddingTop="18sp" android:paddingBottom="18sp"/>
 </LinearLayout>

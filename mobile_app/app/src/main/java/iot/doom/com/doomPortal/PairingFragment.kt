@@ -51,7 +51,7 @@ class PairingFragment : Fragment() {
         pairingButton.setOnClickListener {
             //it.visibility = View.GONE
             //progressBar.visibility = View.VISIBLE
-            DoomApi.instance.pairDevice(PairingRequest(Settings.Secure.getString(context!!.contentResolver, Settings.Secure.ANDROID_ID))).enqueue(
+            DoomApi.instance.pairDevice(PairingRequest(DoomApi.getDeviceId(context!!))).enqueue(
                 object : Callback<Unit> {
                     override fun onFailure(call: Call<Unit>, t: Throwable) {
                         Toast.makeText(context, t.message, Toast.LENGTH_SHORT).show()

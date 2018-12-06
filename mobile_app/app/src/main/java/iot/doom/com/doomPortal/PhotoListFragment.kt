@@ -42,7 +42,7 @@ class PhotoListFragment : Fragment(), OnListFragmentInteractionListener {
     @SuppressLint("HardwareIds")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        DoomApi.instance.getWhitelist(Settings.Secure.getString(context!!.contentResolver, Settings.Secure.ANDROID_ID)).enqueue(
+       DoomApi.instance.getWhitelist(DoomApi.getDeviceId(context!!)).enqueue(
             object : Callback<List<DoomPhoto>> {
                 override fun onFailure(call: Call<List<DoomPhoto>>, t: Throwable) {
                     Toast.makeText(context, t.message, Toast.LENGTH_SHORT).show()
@@ -63,10 +63,10 @@ class PhotoListFragment : Fragment(), OnListFragmentInteractionListener {
 
     override fun onListFragmentInteraction(item: DoomPhoto, sharedImageView: ImageView) {
         val transitionName = ViewCompat.getTransitionName(sharedImageView)!!
-        findNavController(view!!).navigate(R.id.photoListtoDetail,
+        /*findNavController(view!!).navigate(R.id.photoListtoDetail,
             bundleOf("transition_name" to transitionName), null,
             FragmentNavigatorExtras(sharedImageView to transitionName)
-        )
+        )*/
     }
 }
 

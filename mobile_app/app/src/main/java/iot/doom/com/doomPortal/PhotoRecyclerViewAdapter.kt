@@ -24,12 +24,18 @@ class PhotoRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mValues[position]
-        val photo = Base64.decode(item.photoBase64, Base64.DEFAULT)
-        if (photo != null) {
+        if (item.photoUrl != null) {
             Glide.with(holder.context)
-                .asBitmap()
-                .load(photo)
+                .load(item.photoUrl)
                 .into(holder.mImageView)
+        } else {
+            val photo = Base64.decode(item.photoBase64, Base64.DEFAULT)
+            if (photo != null) {
+                Glide.with(holder.context)
+                    .asBitmap()
+                    .load(photo)
+                    .into(holder.mImageView)
+            }
         }
         holder.mTextView.text = item.name
         ViewCompat.setTransitionName(holder.mImageView, "photo_" + item.name)

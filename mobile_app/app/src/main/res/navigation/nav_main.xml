@@ -4,14 +4,10 @@
             xmlns:tools="http://schemas.android.com/tools" android:id="@+id/nav_main"
             app:startDestination="@id/mainActivityFragment">
 
-    <fragment android:id="@+id/photoDetailFragment" android:name="iot.doom.com.doomPortal.PhotoDetailFragment"
-              android:label="PhotoDetailFragment" tools:layout="@layout/fragment_photo_detail">
-    </fragment>
     <fragment android:id="@+id/mainActivityFragment" android:name="iot.doom.com.doomPortal.MainActivityFragment"
               android:label="MainActivityFragment" tools:layout="@layout/fragment_photo_list">
-        <action android:id="@+id/photoListtoDetail" app:destination="@id/photoDetailFragment" app:popUpTo="@id/mainActivityFragment"/>
         <action android:id="@+id/action_disconnect" app:destination="@id/pairingFragment"/>
-        <action android:id="@+id/action_add_photo" app:popUpTo="@id/mainActivityFragment" app:destination="@id/addPhotoFragment"/>
+        <action android:id="@+id/action_add_photo" app:popUpTo="@id/nav_main" app:destination="@id/addPhotoFragment"/>
     </fragment>
     <fragment android:id="@+id/pairingFragment" android:name="iot.doom.com.doomPortal.PairingFragment"
               android:label="PairingFragment" tools:layout="@layout/fragment_auth">

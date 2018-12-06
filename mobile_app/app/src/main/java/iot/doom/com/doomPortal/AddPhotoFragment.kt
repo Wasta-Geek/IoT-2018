@@ -1,27 +1,40 @@
 package iot.doom.com.doomPortal
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
+import android.preference.PreferenceManager
+import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_add_photo.*
-import android.content.Intent
-import android.provider.Settings
-import android.util.Log
 import okhttp3.MediaType
-import okhttp3.RequestBody
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 
 class AddPhotoFragment : Fragment() {
 
     private val PICK_IMAGE = 100
     private val CAMERA_REQUEST = 1888
+
+    private var photo: Bitmap? = null
+    private var file: File? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -36,6 +49,8 @@ class AddPhotoFragment : Fragment() {
             startActivityForResult(cameraIntent, CAMERA_REQUEST)
         }
 
+        Log.d("Token",  PreferenceManager.getDefaultSharedPreferences(context).getString("fcm_token", null))
+
         importButton.setOnClickListener {
             val intent = Intent()
             intent.type = "image/*"
@@ -43,52 +58,76 @@ class AddPhotoFragment : Fragment() {
             startActivityForResult(Intent.createChooser(intent, "Choisir une image"), PICK_IMAGE)
         }
 
-        addPhoto.setOnClickListener {
-            // TODO send to server
+        ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
 
-            findNavController().navigateUp()
+        addPhoto.setOnClickListener {
+            if (file != null && !photoNameInput.text.isNullOrEmpty()) uploadImage()
         }
     }
 
-    /*fun uploadImage() {
-
-        // create RequestBody instance from file
-        val requestFile = RequestBody.create(
-            MediaType.parse(getContentResolver().getType(fileUri)),
-            file
+    @SuppressLint("HardwareIds")
+    fun uploadImage() {
+        val filePart = MultipartBody.Part.createFormData(
+            "picture",
+            file?.name,
+            RequestBody.create(MediaType.parse("image/*"), file!!)
         )
 
-        // MultipartBody.Part is used to send also the actual file name
-        val body = MultipartBody.Part.createFormData("picture", file.getName(), requestFile)
+        val namePart = RequestBody.create(MediaType.parse("text/plain"), photoNameInput.text.toString())
 
-        // add another part within the multipart request
-        val descriptionString = "hello, this is description speaking"
-
-        val requestBody = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("picture", "")
-            .addFormDataPart("name", photoNameInput.text.toString())
-            .build()
-
-        DoomApi.instance.addWhitelist(Settings.Secure.getString(context!!.contentResolver, Settings.Secure.ANDROID_ID), requestBody).enqueue(object : Callback<Unit> {
+        DoomApi.instance.addWhitelist(DoomApi.getDeviceId(context!!), filePart, namePart).enqueue(object : Callback<Unit> {
             override fun onFailure(call: Call<Unit>, t: Throwable) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
             }
 
             override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                if (response.isSuccessful) findNavController().navigateUp()
             }
 
         })
-    }*/
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == PICK_IMAGE || requestCode == CAMERA_REQUEST) {
-            if (resultCode == Activity.RESULT_OK) {
-                Log.d("DataPhoto", data?.data?.toString())
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                CAMERA_REQUEST -> {
+                    photo = data?.extras?.get("data") as Bitmap
+                }
+                PICK_IMAGE -> {
+                    val stream = context?.contentResolver?.openInputStream(data?.data!!)
+                    photo = BitmapFactory.decodeStream(stream)
+                    stream?.close()
+                }
+                else -> return
+            }
+            Glide.with(context!!).asBitmap().load(photo).into(pictureView)
+            val tempUri = getImageUri(context!!, photo!!)
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            file = File(getRealPathFromURI(tempUri))
+            Log.d("DataPhoto", photo.toString())
+        }
+    }
+
+    private fun getImageUri(inContext : Context, inImage: Bitmap) : Uri {
+        val outImage = Bitmap.createScaledBitmap(inImage, 1000, 1000,true)
+        val path = MediaStore.Images.Media.insertImage(inContext.contentResolver, outImage, "Title", null)
+        return Uri.parse(path)
+    }
+
+    private fun getRealPathFromURI(uri: Uri): String {
+        var path = ""
+        if (context?.contentResolver != null) {
+            val cursor = context?.contentResolver?.query(uri, null, null, null, null)
+            if (cursor != null) {
+                cursor.moveToFirst()
+                val idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)
+                path = cursor.getString(idx)
+                cursor.close()
             }
         }
+        return path
     }
 }
