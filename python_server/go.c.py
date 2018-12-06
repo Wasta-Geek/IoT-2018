@@ -35,8 +35,9 @@ def unlock_door(payload):
 
     message_title = "UN HIBOU"
     data_message = {
-        "url": "https://cloud.netlifyusercontent.com/assets/344dbf88-fdf9-42bb-adb4-46f01eedd629/242ce817-97a3-48fe-9acd-b1bf97930b01/09-posterization-opt.jpg",
-        "id": uuid.uuid4()
+        "data": {
+            "url": "https://cloud.netlifyusercontent.com/assets/344dbf88-fdf9-42bb-adb4-46f01eedd629/242ce817-97a3-48fe-9acd-b1bf97930b01/09-posterization-opt.jpg"
+        }
     }
 
     push_service.notify_single_device(registration_id=registration_id, message_title=message_title, data_message=data_message)
