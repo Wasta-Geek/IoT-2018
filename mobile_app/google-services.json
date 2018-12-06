@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "426387539905",
+    "firebase_url": "https://iot-of-doom.firebaseio.com",
+    "project_id": "iot-of-doom",
+    "storage_bucket": "iot-of-doom.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:426387539905:android:27ea88426f414cab",
+        "android_client_info": {
+          "package_name": "iot.doom.com.doomPortal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "426387539905-a37eten6f7re56563t1ehptqlkpf8ptm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "iot.doom.com.doomPortal",
+            "certificate_hash": "6fd7484b628df5e675ed55042d5c10b4034336f9"
+          }
+        },
+        {
+          "client_id": "426387539905-tjiifdcfa4ktrnhdr3r2hdfetkcj1ibe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxtuaJMeZ2VLoyn13itQY9peKRh2FbjmQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "426387539905-tjiifdcfa4ktrnhdr3r2hdfetkcj1ibe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

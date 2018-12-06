@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools" android:id="@+id/nav_main"
+            app:startDestination="@id/mainActivityFragment">
+
+    <fragment android:id="@+id/mainActivityFragment" android:name="iot.doom.com.doomPortal.MainActivityFragment"
+              android:label="MainActivityFragment" tools:layout="@layout/fragment_photo_list">
+        <action android:id="@+id/action_disconnect" app:destination="@id/pairingFragment"/>
+        <action android:id="@+id/action_add_photo" app:popUpTo="@id/nav_main" app:destination="@id/addPhotoFragment"/>
+    </fragment>
+    <fragment android:id="@+id/pairingFragment" android:name="iot.doom.com.doomPortal.PairingFragment"
+              android:label="PairingFragment" tools:layout="@layout/fragment_auth">
+        <action android:id="@+id/action_successful_pairing" app:destination="@id/mainActivityFragment"/>
+    </fragment>
+    <fragment android:id="@+id/addPhotoFragment" android:name="iot.doom.com.doomPortal.AddPhotoFragment"
+              android:label="AddPhotoFragment" tools:layout="@layout/fragment_add_photo"/>
+</navigation>

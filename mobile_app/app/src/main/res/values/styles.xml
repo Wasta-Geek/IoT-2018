@@ -1,0 +1,33 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents">
+        <!-- Customize your theme here. -->
+        <item name="android:statusBarColor">@color/statusBarColor</item>
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="colorAccent">@color/primaryLightColor</item>
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:textColorPrimaryInverse">@color/primaryTextColor</item>
+        <item name="android:textColorPrimary">@color/primaryTextColor</item>
+        <item name="android:textColorSecondary">#757575</item>
+        <item name="android:colorBackground">@color/primaryDarkColor</item>
+    </style>
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="PrimaryFlatButton" parent="Widget.MaterialComponents.Button.TextButton">
+
+    </style>
+
+    <style name="CustomMaterialComponents" parent="Theme.MaterialComponents">
+        <item name="materialButtonStyle">@style/Widget.MyApp.MyButton</item>
+        <item name="colorAccent">@color/secondaryColor</item>
+    </style>
+
+    <style name="Widget.MyApp.MyButton" parent="Widget.MaterialComponents.Button">
+    </style>
+
+</resources>
