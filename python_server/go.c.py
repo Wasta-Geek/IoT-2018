@@ -22,6 +22,7 @@ root_topic = "doom_portal/"
 lastPairingAttempt = 0
 authenticatedDevices = ["fred"]
 photoFilename = "cam_photo.png"
+photoAtDoorIdentifier = "intruder"
 
 push_service = FCMNotification(api_key="AAAAY0ath8E:APA91bHYBjrFZvTUSeL5ieVdeRvqMHauBDSCvgeV19jdxznTbZvVTfVKArgc1P8cUeNOskV3cZzQQa2rq0QiN3rh0FQ3D1wWlk8-g2EAgnwyhZlSp0rzCxf7r5cgMc4RJJk_7uptG-te")
 registration_id = "dvmcekOlNpE:APA91bGFEN7km3aPM_Qd-nVAJdoHHTMK7C7a8OozPyIgo2umzolDoEXIapoVaba2JNl3Fdi8tttNv_PbKPHe0BYxZHgYebr8V5anNQVnFjQxVEcE5WgA_2znZ8LDoj6NGtWc7AREVEET"
@@ -51,18 +52,18 @@ def unlock_door(payload):
     # après tu l'as dans photo_url et c'est GG
     # si tu veux un exemple va voir dans le get_whitelist
 
-    message_title = "UN HIBOU"
-    data_message = {
-        "data": {
-            "url": "https://cloud.netlifyusercontent.com/assets/344dbf88-fdf9-42bb-adb4-46f01eedd629/242ce817-97a3-48fe-9acd-b1bf97930b01/09-posterization-opt.jpg"
-        }
-    }
+#    message_title = "UN HIBOU"
+#    data_message = {
+#        "data": {
+#            "url": "https://cloud.netlifyusercontent.com/assets/344dbf88-fdf9-42bb-adb4-46f01eedd629/242ce817-97a3-48fe-9acd-b1bf97930b01/09-posterization-opt.jpg"
+   #     }
+  #  }
 
-    push_service.notify_single_device(registration_id=registration_id, message_title=message_title, data_message=data_message)
+#    push_service.notify_single_device(registration_id=registration_id, message_title=message_title, data_message=data_message)
 
-    return
+#    return
     detectFace.take_webcam_photo(photoFilename)
-
+    upload(photoFilename, public_id=photoAtDoorIdentifier)
     unknown_image = face_recognition.load_image_file(photoFilename)
     unknowns_encoding = face_recognition.face_encodings(unknown_image)
 
