@@ -15,7 +15,6 @@ from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from cloudinary import CloudinaryImage
 from pyfcm import FCMNotification
-import uuid
 
 broker = "broker.mqttdashboard.com"
 root_topic = "doom_portal/"
@@ -25,11 +24,6 @@ photoFilename = "cam_photo.png"
 
 push_service = FCMNotification(api_key="AAAAY0ath8E:APA91bHYBjrFZvTUSeL5ieVdeRvqMHauBDSCvgeV19jdxznTbZvVTfVKArgc1P8cUeNOskV3cZzQQa2rq0QiN3rh0FQ3D1wWlk8-g2EAgnwyhZlSp0rzCxf7r5cgMc4RJJk_7uptG-te")
 registration_id = "dvmcekOlNpE:APA91bGFEN7km3aPM_Qd-nVAJdoHHTMK7C7a8OozPyIgo2umzolDoEXIapoVaba2JNl3Fdi8tttNv_PbKPHe0BYxZHgYebr8V5anNQVnFjQxVEcE5WgA_2znZ8LDoj6NGtWc7AREVEET"
-
-# cloudinary_api_key = "584812496861958"
-# cloudinary_api_secret = "Y9f-WHpXczrM0C0WjfP7PB6MQEo"
-# cloudinary_URL =
-
 
 def upload_existing_whitelist():
     print("Uploading whitelist folder ...")
@@ -44,23 +38,6 @@ upload_existing_whitelist()
 def unlock_door(payload):
     print("Trying to unlock door with payload " + str(payload))
 
-    # SALUT BABOU
-    # Pour avoir l'url, tu fais cette commande :
-    # photo_url, options = cloudinary_url(person, format="jpg", crop="fill")
-    # la variable person c'est le nom du gars, qui doit être celui du folder (genre "Babou")
-    # après tu l'as dans photo_url et c'est GG
-    # si tu veux un exemple va voir dans le get_whitelist
-
-    message_title = "UN HIBOU"
-    data_message = {
-        "data": {
-            "url": "https://cloud.netlifyusercontent.com/assets/344dbf88-fdf9-42bb-adb4-46f01eedd629/242ce817-97a3-48fe-9acd-b1bf97930b01/09-posterization-opt.jpg"
-        }
-    }
-
-    push_service.notify_single_device(registration_id=registration_id, message_title=message_title, data_message=data_message)
-
-    return
     detectFace.take_webcam_photo(photoFilename)
 
     unknown_image = face_recognition.load_image_file(photoFilename)
@@ -68,21 +45,35 @@ def unlock_door(payload):
 
     whitelist = glob.glob("./whitelist/*/*.jpg")
 
+    photo_url, options = cloudinary_url("intruder", format="jpg", crop="fill")
+    data_message = {
+        "data": {
+            "url": photo_url
+        }
+    }
+
     for people in whitelist:
-        print(people)
+
         for unknown_encoding in unknowns_encoding:
-            print(unknown_encoding[0])
+
             known_image = face_recognition.load_image_file(people)
             biden_encoding = face_recognition.face_encodings(known_image)[0]
 
             results = face_recognition.compare_faces([biden_encoding], unknown_encoding)
-            print(results)
+
             if results[0]:
+                print(results[0])
+
+                message_title = "Une personne vient de rentrer chez vous, dites bonjour !"
+                push_service.notify_single_device(registration_id=registration_id, message_title=message_title, data_message=data_message)
                 mqtt_client.publish(root_topic + "unlock_response", "AUTHORIZED")
                 print("AUTHORIZED")
                 return
 
+    message_title = "OH MON DIEU UN INCONNU"
+    push_service.notify_single_device(registration_id=registration_id, message_title=message_title, data_message=data_message)
     mqtt_client.publish(root_topic + "unlock_response", "UNAUTHORIZED")
+    print("UNAUTHORIZED")
 
 
 # improvement : get time to pair from mqtt call and set callback to publish a response
