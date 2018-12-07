@@ -21,6 +21,7 @@ root_topic = "doom_portal/"
 lastPairingAttempt = 0
 authenticatedDevices = ["fred"]
 photoFilename = "cam_photo.png"
+photoAtDoorIdentifier = "intruder"
 
 push_service = FCMNotification(api_key="AAAAY0ath8E:APA91bHYBjrFZvTUSeL5ieVdeRvqMHauBDSCvgeV19jdxznTbZvVTfVKArgc1P8cUeNOskV3cZzQQa2rq0QiN3rh0FQ3D1wWlk8-g2EAgnwyhZlSp0rzCxf7r5cgMc4RJJk_7uptG-te")
 registration_id = "dvmcekOlNpE:APA91bGFEN7km3aPM_Qd-nVAJdoHHTMK7C7a8OozPyIgo2umzolDoEXIapoVaba2JNl3Fdi8tttNv_PbKPHe0BYxZHgYebr8V5anNQVnFjQxVEcE5WgA_2znZ8LDoj6NGtWc7AREVEET"
@@ -39,7 +40,7 @@ def unlock_door(payload):
     print("Trying to unlock door with payload " + str(payload))
 
     detectFace.take_webcam_photo(photoFilename)
-
+    upload(photoFilename, public_id=photoAtDoorIdentifier)
     unknown_image = face_recognition.load_image_file(photoFilename)
     unknowns_encoding = face_recognition.face_encodings(unknown_image)
 
