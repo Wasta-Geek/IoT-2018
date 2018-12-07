@@ -24,7 +24,7 @@ photoFilename = "cam_photo.png"
 photoAtDoorIdentifier = "intruder"
 
 push_service = FCMNotification(api_key="AAAAY0ath8E:APA91bHYBjrFZvTUSeL5ieVdeRvqMHauBDSCvgeV19jdxznTbZvVTfVKArgc1P8cUeNOskV3cZzQQa2rq0QiN3rh0FQ3D1wWlk8-g2EAgnwyhZlSp0rzCxf7r5cgMc4RJJk_7uptG-te")
-registration_id = "dvmcekOlNpE:APA91bGFEN7km3aPM_Qd-nVAJdoHHTMK7C7a8OozPyIgo2umzolDoEXIapoVaba2JNl3Fdi8tttNv_PbKPHe0BYxZHgYebr8V5anNQVnFjQxVEcE5WgA_2znZ8LDoj6NGtWc7AREVEET"
+registration_id = "dCmfDNpJUiE:APA91bFoE-kT4FmfrHErfyylghM34Wg2vkP74ZlCc8o2uXSLtfEDasJWERfw6ffqP_kDbmIEt_Ir4TbDxzD0KEIYjrO2q1kWK_bjZXgXmiCv_fWruQLD95jeBsaOgd8NZsYkfeNJrpFq"
 
 def upload_existing_whitelist():
     print("Uploading whitelist folder ...")
@@ -46,13 +46,6 @@ def unlock_door(payload):
 
     whitelist = glob.glob("./whitelist/*/*.jpg")
 
-    photo_url, options = cloudinary_url("intruder", format="jpg", crop="fill")
-    data_message = {
-        "data": {
-            "url": photo_url
-        }
-    }
-
     for people in whitelist:
 
         for unknown_encoding in unknowns_encoding:
@@ -64,14 +57,18 @@ def unlock_door(payload):
 
             if results[0]:
                 print(results[0])
-
-                message_title = "Une personne vient de rentrer chez vous, dites bonjour !"
-                push_service.notify_single_device(registration_id=registration_id, message_title=message_title, data_message=data_message)
                 mqtt_client.publish(root_topic + "unlock_response", "AUTHORIZED")
                 print("AUTHORIZED")
                 return
 
     message_title = "OH MON DIEU UN INCONNU"
+    photo_url, options = cloudinary_url("intruder", format="png", crop="fill")
+    data_message = {
+        "data": {
+            "url": str(photo_url)
+        }
+    }
+
     push_service.notify_single_device(registration_id=registration_id, message_title=message_title, data_message=data_message)
     mqtt_client.publish(root_topic + "unlock_response", "UNAUTHORIZED")
     print("UNAUTHORIZED")
